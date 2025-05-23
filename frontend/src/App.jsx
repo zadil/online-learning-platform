@@ -1,4 +1,4 @@
-docker-compose up -dimport { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -20,6 +20,21 @@ function App() {
     setPage("login");
   };
 
+  // Extraction du user depuis le profil si connecté
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    if (!token) { setUser(null); return; }
+    fetch("http://localhost:8080/protected/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(setUser)
+      .catch(() => setUser(null));
+  }, [token]);
+
   return (
     <div className="container">
       <nav>
@@ -34,7 +49,7 @@ function App() {
         {page === "login" && <Login onLogin={handleLogin} />}
         {page === "register" && <Register onRegister={() => setPage("login")} />}
         {page === "profile" && <Profile token={token} />}
-        {page === "catalog" && <Catalog />}
+        {page === "catalog" && <Catalog user={user} token={token} />}
         {page === "home" && (
           <>
             <h1>Bienvenue sur la plateforme d'apprentissage !</h1>

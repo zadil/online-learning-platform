@@ -6,6 +6,8 @@ import (
 	"online-learning-platform-backend/internal/db"
 	"database/sql"
 	"context"
+	"fmt"
+	"strings"
 )
 
 func ListCoursesHandler(queries *db.Queries, dbConn *sql.DB) gin.HandlerFunc {
@@ -28,8 +30,10 @@ func CreateCourseHandler(queries *db.Queries, dbConn *sql.DB) gin.HandlerFunc {
 		if f, ok := userIDRaw.(float64); ok {
 			userID = int(f)
 		}
-		if role != "formateur" && role != "admin" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Seuls les formateurs ou admins peuvent créer un cours."})
+		roleNormalized := strings.TrimSpace(strings.ToLower(role))
+		if roleNormalized != "formateur" && roleNormalized != "admin" {
+			fmt.Printf("[DEBUG] Refus création cours: userID=%v, role reçu='%v' (normalisé='%v')\n", userID, role, roleNormalized)
+			c.JSON(http.StatusForbidden, gin.H{"error": "Seuls les formateurs ou admins peuvent créer un cours. (role reçu: " + role + ")"})
 			return
 		}
 		var req struct {
