@@ -1,0 +1,5 @@
+%syntax-version=1.0.0
+%project=online-learning-platform
+
+users_table 2025-05-23T18:23:26Z Adil Zouhal <adil.zouhal@adevinta.com> # Création de la table users
+courses_table 2025-05-23T20:13:46Z Adil Zouhal <adil.zouhal@adevinta.com> # Création de la table courses
