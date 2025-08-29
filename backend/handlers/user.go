@@ -7,9 +7,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 	"online-learning-platform-backend/internal/db"
 )
+
+var validate = validator.New()
 
 // Handler d'inscription utilisateur
 func RegisterUserHandler(queries *db.Queries, dbConn *sql.DB) gin.HandlerFunc {
@@ -17,10 +20,18 @@ func RegisterUserHandler(queries *db.Queries, dbConn *sql.DB) gin.HandlerFunc {
 		var req struct {
 			Name     string `json:"name" binding:"required"`
 			Email    string `json:"email" binding:"required,email"`
-			Password string `json:"password" binding:"required,min=6"`
-			Role     string `json:"role" binding:"required"`
+			Password string `json:"password" binding:"required,min=6,max=72"`
+			Role     string `json:"role" binding:"required,oneof=student teacher admin"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
+			if fieldErr, ok := err.(validator.ValidationErrors); ok {
+				for _, e := range fieldErr {
+					if e.Field() == "Password" && e.Tag() == "min" {
+						c.JSON(http.StatusBadRequest, gin.H{"error": "Le mot de passe doit contenir au moins 6 caractères"})
+						return
+					}
+				}
+			}
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

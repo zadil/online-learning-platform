@@ -1,10 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
 	"net/http"
-	"database/sql"
 	_ "github.com/lib/pq"
 	"log"
 	"strings"
@@ -16,7 +16,7 @@ import (
 
 
 func main() {
-	dbConn, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=online_learning sslmode=disable")
+	dbConn, err := sql.Open("postgres", "host=db port=5432 user=postgres password=postgres dbname=online_learning sslmode=disable")
 	if err != nil {
 		log.Fatalf("Erreur de connexion à la base de données : %v", err)
 	}
