@@ -256,7 +256,7 @@ export default function Register({ onRegister }) {
                     <select
                       value={formData.role}
                       onChange={(e) => updateFormData('role', e.target.value)}
-                      className="w-full h-12 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 bg-white text-sm transition-all duration-200"
+                      className="w-full h-12 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 bg-white text-sm text-gray-900 transition-all duration-200"
                     >
                       <option value="apprenant">Apprenant</option>
                       <option value="formateur">Formateur</option>

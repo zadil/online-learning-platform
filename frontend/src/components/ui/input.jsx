@@ -18,7 +18,7 @@ const Input = React.forwardRef(({ className, type, label, icon: Icon, error, ...
         <input
           type={type}
           className={cn(
-            'flex h-12 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm transition-all duration-200',
+            'flex h-12 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 transition-all duration-200',
             'placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100',
             'disabled:cursor-not-allowed disabled:opacity-50',
             Icon ? 'pl-11' : 'pl-4',
