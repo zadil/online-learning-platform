@@ -268,7 +268,7 @@ export default function Register({ onRegister }) {
                   <Button 
                     type="button" 
                     onClick={handlePrev}
-                    variant="outline"
+                    variant="secondary"
                     className="flex-1"
                     size="lg"
                   >
@@ -333,7 +333,7 @@ export default function Register({ onRegister }) {
                   <Button 
                     type="button" 
                     onClick={handlePrev}
-                    variant="outline"
+                    variant="secondary"
                     className="flex-1"
                     size="lg"
                   >
