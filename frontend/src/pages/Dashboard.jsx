@@ -43,9 +43,12 @@ const MessageIcon = ({ className }) => (
 
 export default function Dashboard({ user, token }) {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [stats, setStats] = useState({ students: 0, teachers: 0, courses: 0 });
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
   
-  // Redirection si pas connecté ou pas admin/teacher
-  if (!token || !user) {
+  // Redirection si pas connecté
+  if (!token) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -60,34 +63,79 @@ export default function Dashboard({ user, token }) {
       </div>
     );
   }
+  
+  // Loading state while user data is being fetched
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
-  // Données simulées pour les métriques
+  // Fetch real statistics from backend
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [usersRes, coursesRes] = await Promise.all([
+          fetch('http://localhost:8080/protected/users', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch('http://localhost:8080/courses', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+        
+        const users = usersRes.ok ? await usersRes.json() : [];
+        const courses = coursesRes.ok ? await coursesRes.json() : [];
+        
+        const students = users.filter(u => u.role === 'student');
+        const teachers = users.filter(u => u.role === 'teacher');
+        
+        setStats({
+          students: students.length,
+          teachers: teachers.length,
+          courses: courses.length
+        });
+        
+        // Set recent activities based on user creation dates
+        const recentUsers = users
+          .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt))
+          .slice(0, 3)
+          .map(user => ({
+            title: `Nouvel utilisateur: ${user.name}`,
+            type: user.role === 'student' ? 'Inscription' : 'Enseignant',
+            time: new Date(user.CreatedAt).toLocaleDateString('fr-FR')
+          }));
+        
+        setRecentActivities(recentUsers);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+        setLoading(false);
+      }
+    };
+    
+    if (token) {
+      fetchStats();
+    }
+  }, [token]);
+
+  // Show loading while fetching data
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Real metrics based on fetched data
   const metrics = {
-    students: { value: '1,247', trend: 'up', trendValue: '+12%' },
-    teachers: { value: '89', trend: 'up', trendValue: '+5%' },
-    classes: { value: '23', trend: 'up', trendValue: '+2%' }
+    students: { value: stats.students.toString(), trend: 'up', trendValue: '+0%' },
+    teachers: { value: stats.teachers.toString(), trend: 'up', trendValue: '+0%' },
+    classes: { value: stats.courses.toString(), trend: 'up', trendValue: '+0%' }
   };
-
-  // Données simulées pour les étudiants récents
-  const recentStudents = [
-    { name: 'Sébastien Rey', time: '2 days', action: 'Inscrit en GM1' },
-    { name: 'Eliza Roberts', time: '3 days', action: 'Meilleure l\'excellent' },
-    { name: 'Alexander Jean', time: '3 days', action: 'A fini sa phase' }
-  ];
-
-  // Données simulées pour les activités récentes
-  const recentActivities = [
-    { title: 'Olympiad Math Annuel', type: 'Olympus', time: 'il y a 2 heures' },
-    { title: 'Passion du Projet de 5...', type: 'Benevolé', time: 'il y a 3 heures' },
-    { title: 'Journée de Bénév...', type: 'Feedback', time: 'il y a 5 heures' }
-  ];
-
-  // Données pour les messages
-  const messages = [
-    { name: 'Sebastien Rey', time: 'Il y a 2h', message: 'Tu devrais avoir tes les..', avatar: '👨‍🎓' },
-    { name: 'Eliza Roberts', time: '2:04 PM', message: 'Des couleurs utiles plus...', avatar: '👩‍🎓' },
-    { name: 'Alexander Jean', time: 'À l\'in sr asse', message: '', avatar: '👨‍🎓' }
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -154,9 +202,12 @@ export default function Dashboard({ user, token }) {
               <p className="text-gray-600">École Moderne</p>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">{user.name}</span>
+              <div className="text-right">
+                <span className="text-gray-700 block font-medium">{user.name}</span>
+                <span className="text-sm text-gray-500">{user.email}</span>
+              </div>
               <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-medium">👤</span>
+                <span className="text-white font-medium">{user.name ? user.name.charAt(0).toUpperCase() : '?'}</span>
               </div>
             </div>
           </div>
@@ -253,86 +304,91 @@ export default function Dashboard({ user, token }) {
               </Card>
             </div>
 
-            {/* Right Column - Activity & Messages */}
+            {/* Right Column - Activity & Profile */}
             <div className="space-y-6">
-              {/* Messages */}
+              {/* User Profile Info */}
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Messages</CardTitle>
-                  <span className="text-sm text-blue-600">Voir T..</span>
+                <CardHeader>
+                  <CardTitle>Profil Utilisateur</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {messages.map((message, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span>{message.avatar}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900 truncate">{message.name}</p>
-                          <span className="text-xs text-gray-500">{message.time}</span>
-                        </div>
-                        <p className="text-sm text-gray-600 truncate">{message.message}</p>
-                      </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-medium text-lg">{user.name ? user.name.charAt(0).toUpperCase() : '?'}</span>
                     </div>
-                  ))}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-sm text-gray-600">{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">Rôle</span>
+                      <span className="text-sm font-medium text-blue-600 capitalize">
+                        {user.role === 'student' ? 'Apprenant' : user.role === 'teacher' ? 'Formateur' : user.role}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Membre depuis</span>
+                      <span className="text-sm text-gray-500">
+                        {user.CreatedAt ? new Date(user.CreatedAt).toLocaleDateString('fr-FR') : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
-              {/* Recent Students */}
+              {/* Statistics Summary */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Étudiants</CardTitle>
+                  <CardTitle>Résumé</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {recentStudents.map((student, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                        <UsersIcon className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900">{student.name}</p>
-                          <span className="text-xs text-gray-500">{student.time}</span>
-                        </div>
-                        <p className="text-sm text-gray-600">{student.action}</p>
-                      </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600 mb-1">{stats.students + stats.teachers}</div>
+                    <div className="text-sm text-gray-600">Utilisateurs total</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-semibold text-gray-900">{stats.students}</div>
+                      <div className="text-xs text-gray-500">Apprenants</div>
                     </div>
-                  ))}
+                    <div>
+                      <div className="text-lg font-semibold text-gray-900">{stats.teachers}</div>
+                      <div className="text-xs text-gray-500">Formateurs</div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Recent Activities */}
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Activité Récente</CardTitle>
-                  <CardTitle>Activité Récente</CardTitle>
+                <CardHeader>
+                  <CardTitle>Activités Récentes</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600 mb-1">1,150</div>
-                    <div className="text-sm text-gray-600">Essades</div>
-                    <div className="w-16 h-16 mx-auto mt-3 relative">
-                      <div className="w-16 h-16 rounded-full border-4 border-gray-200"></div>
-                      <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-blue-500 border-t-transparent animate-pulse" 
-                           style={{ transform: 'rotate(270deg)' }}></div>
-                    </div>
-                  </div>
-                  
-                  {recentActivities.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                        <span className="text-orange-600 text-sm">🎯</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                          <span className="text-xs text-gray-600">{activity.type}</span>
+                  {recentActivities.length > 0 ? (
+                    recentActivities.map((activity, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                          <span className="text-green-600 text-sm">👤</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                          <div className="flex items-center space-x-2">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span className="text-xs text-gray-600">{activity.type}</span>
+                            <span className="text-xs text-gray-400">• {activity.time}</span>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-2">📊</div>
+                      <p className="text-sm text-gray-500">Aucune activité récente</p>
                     </div>
-                  ))}
+                  )}
                 </CardContent>
               </Card>
             </div>

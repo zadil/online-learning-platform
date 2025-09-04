@@ -29,24 +29,41 @@ export default function Home({ user }) {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
+  const [stats, setStats] = useState({ students: 0, teachers: 0, courses: 0 });
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(`${config.apiBaseUrl}/courses`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const [coursesRes, usersRes] = await Promise.all([
+          fetch(`${config.apiBaseUrl}/courses`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch(`${config.apiBaseUrl}/protected/users`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+        
+        const coursesData = coursesRes.ok ? await coursesRes.json() : [];
+        const usersData = usersRes.ok ? await usersRes.json() : [];
+        
+        setCourses(coursesData);
+        
+        // Calculate real statistics
+        const students = usersData.filter(u => u.role === 'student');
+        const teachers = usersData.filter(u => u.role === 'teacher');
+        
+        setStats({
+          students: students.length,
+          teachers: teachers.length,
+          courses: coursesData.length
         });
-        const data = await res.json();
-        if (res.ok) setCourses(data);
-      } catch {
-        console.error('Failed to fetch courses');
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
       }
     };
 
     if (token) {
-      fetchCourses();
+      fetchData();
     }
   }, [token]);
 
@@ -99,19 +116,27 @@ export default function Home({ user }) {
                 <div className="text-lg text-gray-700 mb-1">
                   Bienvenue {user ? user.name : 'Visiteur'}
                 </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Nouv. registrés</span>
-                  <span className="text-sm text-gray-600">Tuition</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xl font-bold">12</span>
-                  <span className="text-xl font-bold">15 450 €</span>
-                </div>
-                <div className="mt-3 flex justify-between">
-                  <span className="text-sm text-gray-600">Bulletins</span>
-                  <div className="w-16 h-8 bg-blue-100 rounded"></div>
-                </div>
-                <div className="text-lg font-bold">134</div>
+                {user && (
+                  <>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">Email</span>
+                      <span className="text-sm text-gray-600">Rôle</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500 truncate max-w-[120px]">{user.email}</span>
+                      <span className="text-sm font-medium text-blue-600 capitalize">
+                        {user.role === 'student' ? 'Apprenant' : user.role === 'teacher' ? 'Formateur' : user.role}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex justify-between">
+                      <span className="text-sm text-gray-600">Membre depuis</span>
+                      <div className="w-16 h-8 bg-blue-100 rounded"></div>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {user.CreatedAt ? new Date(user.CreatedAt).toLocaleDateString('fr-FR') : 'Récemment'}
+                    </div>
+                  </>
+                )}
               </div>
             </Card>
 
@@ -153,27 +178,27 @@ export default function Home({ user }) {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
               <MetricCard
-                title="Élèves"
-                value="1,247"
+                title="Étudiants"
+                value={stats.students.toString()}
                 icon={UsersIcon}
                 trend="up"
-                trendValue="+12%"
+                trendValue="+0%"
                 className="backdrop-blur-lg bg-white/90"
               />
               <MetricCard
                 title="Enseignants"
-                value="89"
+                value={stats.teachers.toString()}
                 icon={BookIcon}
                 trend="up"
-                trendValue="+5%"
+                trendValue="+0%"
                 className="backdrop-blur-lg bg-white/90"
               />
               <MetricCard
-                title="Classes"
-                value="23"
+                title="Cours"
+                value={stats.courses.toString()}
                 icon={BookIcon}
                 trend="up"
-                trendValue="+2%"
+                trendValue="+0%"
                 className="backdrop-blur-lg bg-white/90"
               />
             </div>
