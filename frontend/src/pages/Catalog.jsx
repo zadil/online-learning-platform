@@ -59,7 +59,7 @@ export default function Catalog({ user, token }) {
       <h2>Catalogue des cours</h2>
 
       {/* Formulaire de création visible seulement pour formateur/admin */}
-      {user && (user.role === "formateur" || user.role === "admin") && (
+      {user && (user.role === "teacher" || user.role === "admin") && (
         <form onSubmit={handleCreate} className="course-form">
           <h3>Créer un nouveau cours</h3>
           {error && <div className="error">{error}</div>}

@@ -16,7 +16,7 @@ export default function Register({ onRegister }) {
     // Étape 2: Informations de compte
     password: "",
     confirmPassword: "",
-    role: "apprenant",
+    role: "student",
     // Étape 3: Préférences
     newsletter: true,
     terms: false
@@ -258,8 +258,8 @@ export default function Register({ onRegister }) {
                       onChange={(e) => updateFormData('role', e.target.value)}
                       className="w-full h-12 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 bg-white text-sm text-gray-900 transition-all duration-200"
                     >
-                      <option value="apprenant">Apprenant</option>
-                      <option value="formateur">Formateur</option>
+                      <option value="student">Apprenant</option>
+                      <option value="teacher">Formateur</option>
                     </select>
                   </div>
                 </div>
