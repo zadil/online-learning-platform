@@ -10,7 +10,7 @@ const BookIcon = ({ className }) => (
   </svg>
 );
 
-export default function TeacherPortal() {
+export default function TeacherPortal({ user, token }) {
   const [activeTab, setActiveTab] = useState('notes');
   const [newGrade, setNewGrade] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');

@@ -25,7 +25,7 @@ const TrendingUpIcon = ({ className }) => (
   </svg>
 );
 
-export default function Home() {
+export default function Home({ user }) {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
@@ -96,7 +96,9 @@ export default function Home() {
                 </div>
               </div>
               <div className="mb-2">
-                <div className="text-lg text-gray-700 mb-1">Bienvenue Marie Dupont</div>
+                <div className="text-lg text-gray-700 mb-1">
+                  Bienvenue {user ? user.name : 'Visiteur'}
+                </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600">Nouv. registrés</span>
                   <span className="text-sm text-gray-600">Tuition</span>

@@ -52,8 +52,8 @@ function App() {
   if (isFullLayout) {
     return (
       <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/teacher-portal" element={<TeacherPortal />} />
+        <Route path="/dashboard" element={<Dashboard user={user} token={token} />} />
+        <Route path="/teacher-portal" element={<TeacherPortal user={user} token={token} />} />
       </Routes>
     );
   }
@@ -174,13 +174,13 @@ function App() {
       {/* Main content */}
       <main className={showNav ? "" : ""}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home user={user} />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register onRegister={() => navigate("/login", { replace: true })} />} />
           <Route path="/profile" element={<Profile token={token} />} />
           <Route path="/catalog" element={<Catalog user={user} token={token} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/teacher-portal" element={<TeacherPortal />} />
+          <Route path="/dashboard" element={<Dashboard user={user} token={token} />} />
+          <Route path="/teacher-portal" element={<TeacherPortal user={user} token={token} />} />
         </Routes>
       </main>
     </div>

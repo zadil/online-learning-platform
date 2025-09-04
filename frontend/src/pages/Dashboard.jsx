@@ -41,9 +41,25 @@ const MessageIcon = ({ className }) => (
   </svg>
 );
 
-export default function Dashboard() {
+export default function Dashboard({ user, token }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [user, setUser] = useState({ name: 'Indra Veroux' });
+  
+  // Redirection si pas connecté ou pas admin/teacher
+  if (!token || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Accès non autorisé</h2>
+            <p className="text-gray-600 mb-4">Vous devez être connecté pour accéder au tableau de bord.</p>
+            <Button onClick={() => window.location.href = '/login'}>
+              Se connecter
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Données simulées pour les métriques
   const metrics = {
