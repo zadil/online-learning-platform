@@ -254,6 +254,125 @@ const server = http.createServer((req, res) => {
       res.writeHead(200);
       res.end(JSON.stringify(teacherData));
     }
+    // Routes sécurisées Back-Office Admin
+    else if (path === '/bo/admin/login' && req.method === 'POST') {
+      // Login admin sécurisé avec clé supplémentaire
+      let body = '';
+      req.on('data', chunk => { body += chunk.toString(); });
+      req.on('end', () => {
+        try {
+          const { email, password, adminKey, source } = JSON.parse(body);
+          
+          // Vérifications de sécurité strictes
+          const validAdminEmails = [
+            'directeur@ecole-moderne.fr',
+            'admin@ecole-moderne.fr',
+            'superadmin@ecole-moderne.fr'
+          ];
+          
+          const validAdminKey = 'SecureAdmin2024!@#'; // Clé secrète
+          
+          if (source !== 'admin_backoffice') {
+            res.writeHead(403);
+            res.end(JSON.stringify({ error: 'Source non autorisée' }));
+            return;
+          }
+          
+          if (!validAdminEmails.includes(email)) {
+            res.writeHead(401);
+            res.end(JSON.stringify({ error: 'Email administrateur non reconnu' }));
+            return;
+          }
+          
+          if (adminKey !== validAdminKey) {
+            res.writeHead(401);
+            res.end(JSON.stringify({ error: 'Clé d\'accès administrateur invalide' }));
+            return;
+          }
+          
+          // Simulation de validation du mot de passe
+          if (password.length < 6) {
+            res.writeHead(401);
+            res.end(JSON.stringify({ error: 'Mot de passe invalide' }));
+            return;
+          }
+          
+          // Retourner un token admin spécial
+          res.writeHead(200);
+          res.end(JSON.stringify({
+            token: 'admin-secure-token-' + Date.now(),
+            user: mockUsers[0], // Admin principal
+            sessionId: 'secure-' + Math.random().toString(36).substr(2, 9),
+            expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // 2h
+          }));
+        } catch (e) {
+          res.writeHead(400);
+          res.end(JSON.stringify({ error: 'Données invalides' }));
+        }
+      });
+      return;
+    }
+    else if (path === '/bo/admin/security-stats' && req.method === 'GET') {
+      // Statistiques de sécurité
+      const securityStats = {
+        login_attempts: 47,
+        failed_logins: 3,
+        active_sessions: 12,
+        security_alerts: 1,
+        last_breach_attempt: '2024-01-15T10:30:00Z',
+        blocked_ips: 5
+      };
+      res.writeHead(200);
+      res.end(JSON.stringify(securityStats));
+    }
+    else if (path === '/bo/admin/security-logs' && req.method === 'GET') {
+      // Logs de sécurité
+      const securityLogs = [
+        {
+          id: 1,
+          event: 'Tentative de connexion échouée depuis 192.168.1.100',
+          level: 'warning',
+          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+          ip: '192.168.1.100'
+        },
+        {
+          id: 2,
+          event: 'Connexion admin réussie',
+          level: 'info',
+          timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+          ip: '192.168.1.50'
+        },
+        {
+          id: 3,
+          event: 'Tentative d\'accès non autorisé à /bo/admin',
+          level: 'critical',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          ip: '10.0.0.25'
+        }
+      ];
+      res.writeHead(200);
+      res.end(JSON.stringify(securityLogs));
+    }
+    else if (path === '/bo/admin/system-health' && req.method === 'GET') {
+      // Santé du système
+      const systemHealth = {
+        status: 'OK',
+        uptime: '99.98',
+        cpu_usage: '45%',
+        memory_usage: '62%',
+        disk_usage: '78%',
+        active_connections: 145,
+        response_time: '120ms'
+      };
+      res.writeHead(200);
+      res.end(JSON.stringify(systemHealth));
+    }
+    else if (path === '/bo/admin/logout' && req.method === 'POST') {
+      // Log de déconnexion sécurisée
+      console.log('Admin secure logout at', new Date().toISOString());
+      res.writeHead(200);
+      res.end(JSON.stringify({ message: 'Déconnexion sécurisée enregistrée' }));
+    }
     else if (path === '/admin/dashboard-stats' && req.method === 'GET') {
       // Statistiques pour le tableau de bord admin
       const adminStats = {
@@ -314,4 +433,15 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`  GET  /secretariat/stats`);
   console.log(`  GET  /secretariat/students/pending`);
   console.log(`  GET  /teacher/dashboard`);
+  console.log(``);
+  console.log(`🔒 SECURE ADMIN ROUTES:`);
+  console.log(`  POST /bo/admin/login`);
+  console.log(`  GET  /bo/admin/security-stats`);
+  console.log(`  GET  /bo/admin/security-logs`);
+  console.log(`  GET  /bo/admin/system-health`);
+  console.log(`  POST /bo/admin/logout`);
+  console.log(``);
+  console.log(`🔑 Admin Key Required: SecureAdmin2024!@#`);
+  console.log(`📧 Valid Admin Emails: directeur@ecole-moderne.fr, admin@ecole-moderne.fr`);
+  console.log(`🌐 Access URL: https://your-domain.com/bo/admin`);
 });

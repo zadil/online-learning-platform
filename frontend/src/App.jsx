@@ -10,6 +10,9 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import SecretariatDashboard from './pages/SecretariatDashboard';
 import TeacherPortal from './pages/TeacherPortal';
+// Routes sécurisées back-office
+import AdminLogin from './pages/AdminLogin';
+import BackOfficeAdminDashboard from './pages/BackOfficeAdminDashboard';
 import "./App.css";
 
 function App() {
@@ -46,12 +49,12 @@ function App() {
   };
 
   // Pages that should not show the navigation
-  const noNavPages = ['/login', '/register', '/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal'];
-  const showNav = !noNavPages.includes(location.pathname);
+  const noNavPages = ['/login', '/register', '/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal', '/bo/admin', '/bo/admin/dashboard'];
+  const showNav = !noNavPages.includes(location.pathname) && !location.pathname.startsWith('/bo/admin');
 
   // Pages that have their own full layout
-  const fullLayoutPages = ['/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal'];
-  const isFullLayout = fullLayoutPages.includes(location.pathname);
+  const fullLayoutPages = ['/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal', '/bo/admin', '/bo/admin/dashboard'];
+  const isFullLayout = fullLayoutPages.includes(location.pathname) || location.pathname.startsWith('/bo/admin');
 
   // Redirection automatique selon le rôle utilisateur
   useEffect(() => {
@@ -116,6 +119,12 @@ function App() {
                 </p>
               </div>
             </div>
+        } />
+        
+        {/* Routes sécurisées Back-Office Admin */}
+        <Route path="/bo/admin" element={<AdminLogin />} />
+        <Route path="/bo/admin/dashboard" element={
+          <BackOfficeAdminDashboard user={user} token={token} />
         } />
       </Routes>
     );
@@ -417,6 +426,9 @@ function App() {
           <Route path="/register" element={<Register onRegister={() => navigate("/login", { replace: true })} />} />
           <Route path="/profile" element={<Profile token={token} />} />
           <Route path="/catalog" element={<Catalog user={user} token={token} />} />
+          
+          {/* Route de redirection pour back-office */}
+          <Route path="/bo/*" element={<AdminLogin />} />
         </Routes>
       </main>
     </div>
