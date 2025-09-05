@@ -21,6 +21,7 @@ var adminConfig = struct {
 		"directeur@ecole-moderne.fr",
 		"admin@ecole-moderne.fr",
 		"superadmin@ecole-moderne.fr",
+		"admin@gmail.com",
 	},
 	AdminKey: "SecureAdmin2024!@#",
 }
