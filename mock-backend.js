@@ -1,6 +1,60 @@
 const http = require('http');
 const url = require('url');
 
+// Bootstrap configuration - Désactivé après première utilisation
+let bootstrapConfig = {
+  enabled: true,
+  bootstrapKey: 'BOOTSTRAP_ADMIN_2024_SECRET_KEY_XYZ123',
+  maxAttempts: 3,
+  attempts: 0,
+  lockoutUntil: null,
+  used: false
+};
+
+// Fonction pour vérifier si le bootstrap est disponible
+const isBootstrapAvailable = () => {
+  if (!bootstrapConfig.enabled || bootstrapConfig.used) {
+    return false;
+  }
+  
+  // Vérifier si on est en lockout
+  if (bootstrapConfig.lockoutUntil && new Date() < bootstrapConfig.lockoutUntil) {
+    return false;
+  }
+  
+  // Réinitialiser le lockout si expiré
+  if (bootstrapConfig.lockoutUntil && new Date() >= bootstrapConfig.lockoutUntil) {
+    bootstrapConfig.lockoutUntil = null;
+    bootstrapConfig.attempts = 0;
+  }
+  
+  return true;
+};
+
+// Fonction pour créer le premier admin
+const createFirstAdmin = (adminData) => {
+  const newAdmin = {
+    id: Date.now(),
+    name: adminData.name,
+    email: adminData.email,
+    role: 'admin',
+    status: 'active',
+    permissions: ['all'],
+    CreatedAt: new Date().toISOString(),
+    isFirstAdmin: true,
+    createdViaBootstrap: true
+  };
+  
+  // Ajouter à la liste des utilisateurs
+  mockUsers.push(newAdmin);
+  
+  // Désactiver le bootstrap après utilisation
+  bootstrapConfig.used = true;
+  bootstrapConfig.enabled = false;
+  
+  return newAdmin;
+};
+
 // Mock data avec structure de rôles et statuts
 const mockUsers = [
   // Administrateur (Directeur/Direction)
@@ -254,6 +308,101 @@ const server = http.createServer((req, res) => {
       res.writeHead(200);
       res.end(JSON.stringify(teacherData));
     }
+    
+    // Route de bootstrap pour créer le premier admin
+    else if (path === '/bo/setup/bootstrap' && req.method === 'GET') {
+      // Vérifier si le bootstrap est disponible
+      if (!isBootstrapAvailable()) {
+        res.writeHead(403);
+        res.end(JSON.stringify({ 
+          error: 'Bootstrap non disponible',
+          reason: bootstrapConfig.used ? 'déjà utilisé' : 'temporairement verrouillé',
+          lockoutUntil: bootstrapConfig.lockoutUntil
+        }));
+        return;
+      }
+      
+      res.writeHead(200);
+      res.end(JSON.stringify({
+        available: true,
+        message: 'Bootstrap disponible pour création du premier admin',
+        attempts_remaining: bootstrapConfig.maxAttempts - bootstrapConfig.attempts
+      }));
+      return;
+    }
+    else if (path === '/bo/setup/create-admin' && req.method === 'POST') {
+      if (!isBootstrapAvailable()) {
+        res.writeHead(403);
+        res.end(JSON.stringify({ 
+          error: 'Bootstrap non disponible',
+          reason: bootstrapConfig.used ? 'déjà utilisé' : 'temporairement verrouillé'
+        }));
+        return;
+      }
+      
+      let body = '';
+      req.on('data', chunk => body += chunk.toString());
+      req.on('end', () => {
+        try {
+          const { name, email, password, bootstrapKey } = JSON.parse(body);
+          
+          // Vérifier la clé de bootstrap
+          if (bootstrapKey !== bootstrapConfig.bootstrapKey) {
+            bootstrapConfig.attempts++;
+            
+            // Verrouiller après 3 tentatives
+            if (bootstrapConfig.attempts >= bootstrapConfig.maxAttempts) {
+              bootstrapConfig.lockoutUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+            }
+            
+            res.writeHead(401);
+            res.end(JSON.stringify({ 
+              error: 'Clé de bootstrap invalide',
+              attempts_remaining: Math.max(0, bootstrapConfig.maxAttempts - bootstrapConfig.attempts)
+            }));
+            return;
+          }
+          
+          // Valider les données
+          if (!name || !email || !password) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Nom, email et mot de passe requis' }));
+            return;
+          }
+          
+          // Vérifier si un admin existe déjà
+          const existingAdmin = mockUsers.find(u => u.role === 'admin');
+          if (existingAdmin) {
+            res.writeHead(409);
+            res.end(JSON.stringify({ error: 'Un administrateur existe déjà' }));
+            return;
+          }
+          
+          // Créer le premier admin
+          const newAdmin = createFirstAdmin({ name, email, password });
+          
+          res.writeHead(201);
+          res.end(JSON.stringify({
+            success: true,
+            message: 'Premier administrateur créé avec succès',
+            admin: {
+              id: newAdmin.id,
+              name: newAdmin.name,
+              email: newAdmin.email,
+              role: newAdmin.role,
+              createdAt: newAdmin.CreatedAt
+            },
+            bootstrap_disabled: true
+          }));
+          
+        } catch (e) {
+          res.writeHead(400);
+          res.end(JSON.stringify({ error: 'Données JSON invalides' }));
+        }
+      });
+      return;
+    }
+    
     // Routes sécurisées Back-Office Admin
     else if (path === '/bo/admin/login' && req.method === 'POST') {
       // Login admin sécurisé avec clé supplémentaire

@@ -13,6 +13,7 @@ import TeacherPortal from './pages/TeacherPortal';
 // Routes sécurisées back-office
 import AdminLogin from './pages/AdminLogin';
 import BackOfficeAdminDashboard from './pages/BackOfficeAdminDashboard';
+import AdminBootstrap from './pages/AdminBootstrap';
 import "./App.css";
 
 function App() {
@@ -49,12 +50,12 @@ function App() {
   };
 
   // Pages that should not show the navigation
-  const noNavPages = ['/login', '/register', '/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal', '/bo/admin', '/bo/admin/dashboard'];
-  const showNav = !noNavPages.includes(location.pathname) && !location.pathname.startsWith('/bo/admin');
+  const noNavPages = ['/login', '/register', '/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal', '/bo/admin', '/bo/admin/dashboard', '/bo/setup'];
+  const showNav = !noNavPages.includes(location.pathname) && !location.pathname.startsWith('/bo/admin') && !location.pathname.startsWith('/bo/setup');
 
   // Pages that have their own full layout
-  const fullLayoutPages = ['/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal', '/bo/admin', '/bo/admin/dashboard'];
-  const isFullLayout = fullLayoutPages.includes(location.pathname) || location.pathname.startsWith('/bo/admin');
+  const fullLayoutPages = ['/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal', '/bo/admin', '/bo/admin/dashboard', '/bo/setup'];
+  const isFullLayout = fullLayoutPages.includes(location.pathname) || location.pathname.startsWith('/bo/admin') || location.pathname.startsWith('/bo/setup');
 
   // Redirection automatique selon le rôle utilisateur
   useEffect(() => {
@@ -122,6 +123,7 @@ function App() {
         } />
         
         {/* Routes sécurisées Back-Office Admin */}
+        <Route path="/bo/setup" element={<AdminBootstrap />} />
         <Route path="/bo/admin" element={<AdminLogin />} />
         <Route path="/bo/admin/dashboard" element={
           <BackOfficeAdminDashboard user={user} token={token} />

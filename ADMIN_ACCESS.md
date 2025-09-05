@@ -1,5 +1,19 @@
 # 🔐 Guide d'Accès Administrateur Sécurisé
 
+## 🚀 Première Installation : Bootstrap Admin
+
+**AVANT TOUTE CHOSE** : Si c'est votre première installation, vous devez d'abord créer le premier compte administrateur.
+
+👉 **Consultez le guide** : [BOOTSTRAP_ADMIN.md](./BOOTSTRAP_ADMIN.md)
+
+📍 **URL de Bootstrap** : `http://localhost:5173/bo/setup`
+
+🔑 **Clé de Bootstrap** : `BOOTSTRAP_ADMIN_2024_SECRET_KEY_XYZ123`
+
+Une fois le premier admin créé, le système de bootstrap se désactive automatiquement et vous pouvez utiliser l'accès normal décrit ci-dessous.
+
+---
+
 ## 🎯 Route Back-Office Admin
 
 L'accès administrateur se fait via une **route sécurisée non-listée** pour des raisons de sécurité :
