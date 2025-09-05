@@ -4,13 +4,15 @@
 
 **AVANT TOUTE CHOSE** : Si c'est votre première installation, vous devez d'abord créer le premier compte administrateur.
 
-👉 **Consultez le guide** : [BOOTSTRAP_ADMIN.md](./BOOTSTRAP_ADMIN.md)
+### 📋 **Processus Bootstrap** :
 
-📍 **URL de Bootstrap** : `http://localhost:5173/bo/setup`
+1. **Démarrer l'application** : `docker-compose up --build`
+2. **Accéder au bootstrap** : `http://localhost:5173/bo/setup`
+3. **Utiliser la clé bootstrap** : `BOOTSTRAP_ADMIN_2024_SECRET_KEY_XYZ123`
+4. **Créer le premier admin** avec email et mot de passe
+5. **Le bootstrap se désactive automatiquement** après usage
 
-🔑 **Clé de Bootstrap** : `BOOTSTRAP_ADMIN_2024_SECRET_KEY_XYZ123`
-
-Une fois le premier admin créé, le système de bootstrap se désactive automatiquement et vous pouvez utiliser l'accès normal décrit ci-dessous.
+Une fois le premier admin créé, vous pouvez utiliser l'accès normal décrit ci-dessous.
 
 ---
 

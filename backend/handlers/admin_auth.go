@@ -71,8 +71,10 @@ func AdminLogin(queries *db.Queries, dbConn *sql.DB) gin.HandlerFunc {
 		ctx := context.Background()
 		user, err := queries.GetUserByEmail(ctx, req.Email)
 		if err != nil {
+			// Log pour debug
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Identifiants invalides",
+				"error": "Email administrateur non reconnu",
+				"debug": "User not found in database for email: " + req.Email,
 			})
 			return
 		}

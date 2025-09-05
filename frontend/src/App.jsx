@@ -14,7 +14,6 @@ import TeacherPortal from './pages/TeacherPortal';
 import AdminLogin from './pages/AdminLogin';
 import BackOfficeAdminDashboard from './pages/BackOfficeAdminDashboard';
 import AdminBootstrap from './pages/AdminBootstrap';
-import AdminBootstrapSimple from './pages/AdminBootstrapSimple';
 import "./App.css";
 
 function App() {
