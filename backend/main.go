@@ -46,6 +46,8 @@ func main() {
 	routes.RegisterAuthRoutes(r, queries, dbConn)
 	routes.RegisterCoursesRoutes(r, queries, dbConn)
 	routes.RegisterBootstrapRoutes(r, queries, dbConn)
+	routes.RegisterAdminRoutes(r, queries, dbConn)
+	routes.RegisterSecretariatRoutes(r, queries, dbConn)
 
 	routes.RegisterProtectedRoutes(r, dbConn)
 
