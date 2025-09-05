@@ -1,5 +1,5 @@
 // Utilitaire pour l'URL de base de l'API
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://8080-iucjd9gfctt6852icaxiq-6532622b.e2b.dev';
 
 // Fonction helper pour construire les URLs d'API
 export const getApiUrl = (endpoint) => {
