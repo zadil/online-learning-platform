@@ -25,7 +25,12 @@ function App() {
   // Extraction du user depuis le profil si connecté
   const [user, setUser] = useState(null);
   useEffect(() => {
-    if (!token) { setUser(null); return; }
+    // Ne pas essayer de récupérer l'utilisateur sur les pages d'auth
+    if (!token || location.pathname.startsWith('/bo/') || location.pathname === '/login' || location.pathname === '/register') { 
+      setUser(null); 
+      return; 
+    }
+    
     fetch("http://localhost:8080/protected/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -34,8 +39,12 @@ function App() {
         return res.json();
       })
       .then(setUser)
-      .catch(() => setUser(null));
-  }, [token]);
+      .catch(() => {
+        // Token invalide, le nettoyer
+        localStorage.removeItem('token');
+        setUser(null);
+      });
+  }, [token, location.pathname]);
 
   const handleLogin = (tok) => {
     login(tok);
