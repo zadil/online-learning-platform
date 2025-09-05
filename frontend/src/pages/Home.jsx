@@ -70,8 +70,8 @@ export default function Home({ user }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-purple-600">
       {/* Hero Section */}
-      <div className="relative px-6 lg:px-8 pt-20 pb-32">
-        <div className="mx-auto max-w-7xl">
+      <div className="relative px-4 sm:px-6 lg:px-8 pt-20 pb-32">
+        <div className="w-full">
           <div className="text-center">
             <h1 className="text-5xl font-bold tracking-tight text-white sm:text-7xl mb-6">
               Modernisez
@@ -138,7 +138,7 @@ export default function Home({ user }) {
 
           {/* Message spécial pour enseignants non validés */}
           {user && user.role === 'teacher' && user.status === 'pending_validation' && (
-            <div className="mt-16 max-w-3xl mx-auto">
+            <div className="mt-16 px-4 sm:px-6 lg:px-8">
               <Card className="bg-yellow-50 border-yellow-200">
                 <CardContent className="p-6 text-center">
                   <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -159,7 +159,7 @@ export default function Home({ user }) {
           )}
 
           {/* Glass Cards Section */}
-          <div className={`${user && user.role === 'teacher' && user.status === 'pending_validation' ? 'mt-8' : 'mt-24'} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto`}>
+          <div className={`${user && user.role === 'teacher' && user.status === 'pending_validation' ? 'mt-8' : 'mt-24'} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8`}>
             {/* Tableau de bord Card */}
             <Card variant="glass" className="p-6 transform hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between mb-4">
@@ -245,13 +245,13 @@ export default function Home({ user }) {
       {/* Statistics Section */}
       {token && (
         <div className="bg-white/10 backdrop-blur-lg border-t border-white/20">
-          <div className="max-w-7xl mx-auto px-6 py-16">
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-white mb-4">Aperçu de votre école</h2>
               <p className="text-blue-100">Statistiques en temps réel</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
               <MetricCard
                 title="Étudiants"
                 value={stats.students.toString()}
@@ -281,13 +281,13 @@ export default function Home({ user }) {
             {/* Course Grid */}
             {courses.length > 0 && (
               <div>
-                <h3 className="text-2xl font-bold text-white mb-8 text-center">Cours disponibles</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-6 sm:mb-8 text-center">Cours disponibles</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {courses.map(course => (
                     <Card key={course.id} variant="glass" className="backdrop-blur-lg bg-white/90 hover:bg-white/95 transition-all duration-300">
                       <CardContent className="p-6">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3">{course.title}</h3>
-                        <p className="text-gray-600 mb-4">{course.description?.String || 'Pas de description'}</p>
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">{course.title}</h3>
+                        <p className="text-sm sm:text-base text-gray-600 mb-4">{course.description?.String || 'Pas de description'}</p>
                         <Button variant="outline" size="sm" className="w-full">
                           Voir le cours
                         </Button>

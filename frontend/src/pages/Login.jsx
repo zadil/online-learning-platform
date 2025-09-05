@@ -44,8 +44,8 @@ export default function Login({ onLogin }) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-8">
+      <Card className="w-full max-w-md mx-4">
+        <CardContent className="p-6 sm:p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-primary rounded-2xl mx-auto mb-4 flex items-center justify-center">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

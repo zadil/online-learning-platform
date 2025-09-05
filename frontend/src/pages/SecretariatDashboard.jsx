@@ -48,6 +48,7 @@ export default function SecretariatDashboard({ user, token }) {
   const [tasks, setTasks] = useState([]);
   const [pendingEnrollments, setPendingEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -152,9 +153,23 @@ export default function SecretariatDashboard({ user, token }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex relative">
+      {/* Mobile menu button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 bg-white rounded-lg shadow-lg border border-gray-200 text-gray-600 hover:text-gray-900"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
       {/* Sidebar */}
-      <Sidebar>
+      <Sidebar className={`fixed lg:relative z-40 transform transition-transform duration-300 ease-in-out ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
         <SidebarHeader>
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
@@ -216,10 +231,18 @@ export default function SecretariatDashboard({ user, token }) {
         </SidebarContent>
       </Sidebar>
 
+      {/* Overlay pour mobile */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
+        <header className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Secrétariat</h1>
@@ -238,11 +261,11 @@ export default function SecretariatDashboard({ user, token }) {
         </header>
 
         {/* Dashboard Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           {activeTab === 'dashboard' && (
             <>
               {/* Metrics Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <MetricCard
                   title="Inscriptions en attente"
                   value={stats.pending_enrollments?.toString() || '0'}
@@ -274,7 +297,7 @@ export default function SecretariatDashboard({ user, token }) {
               </div>
 
               {/* Tâches urgentes et actions rapides */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
@@ -352,13 +375,13 @@ export default function SecretariatDashboard({ user, token }) {
               </div>
 
               {/* Actions rapides */}
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <Card>
                   <CardHeader>
                     <CardTitle>Actions Rapides</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       <Button 
                         className="w-full justify-start" 
                         variant="outline"

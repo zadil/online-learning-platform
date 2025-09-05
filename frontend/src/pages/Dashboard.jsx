@@ -46,12 +46,13 @@ export default function Dashboard({ user, token }) {
   const [stats, setStats] = useState({ students: 0, teachers: 0, courses: 0 });
   const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Redirection si pas connecté
   if (!token) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md mx-4">
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Accès non autorisé</h2>
             <p className="text-gray-600 mb-4">Vous devez être connecté pour accéder au tableau de bord.</p>
@@ -138,9 +139,23 @@ export default function Dashboard({ user, token }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex relative">
+      {/* Mobile menu button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 bg-white rounded-lg shadow-lg border border-gray-200 text-gray-600 hover:text-gray-900"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
       {/* Sidebar */}
-      <Sidebar>
+      <Sidebar className={`fixed lg:relative z-40 transform transition-transform duration-300 ease-in-out ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
         <SidebarHeader>
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -192,10 +207,18 @@ export default function Dashboard({ user, token }) {
         </SidebarContent>
       </Sidebar>
 
+      {/* Overlay pour mobile */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
+        <header className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
@@ -214,9 +237,9 @@ export default function Dashboard({ user, token }) {
         </header>
 
         {/* Dashboard Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           {/* Metrics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <MetricCard
               title="Élèves"
               value={metrics.students.value}
@@ -240,9 +263,9 @@ export default function Dashboard({ user, token }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
             {/* Left Column - Charts */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="xl:col-span-2 space-y-4 sm:space-y-6">
               {/* Présence Chart */}
               <Card>
                 <CardHeader>

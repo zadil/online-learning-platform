@@ -56,26 +56,27 @@ export default function TeacherPortal({ user, token }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      <div className="w-full">
         {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Portail Enseignant</h1>
+        <header className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Portail Enseignant</h1>
           
           {/* Navigation Tabs */}
-          <div className="flex space-x-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex flex-wrap gap-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${
                   activeTab === tab.id
                     ? 'bg-blue-500 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
+                <span className="text-sm sm:text-base">{tab.icon}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden text-xs">{tab.label.substring(0, 4)}</span>
               </button>
             ))}
           </div>
@@ -83,9 +84,9 @@ export default function TeacherPortal({ user, token }) {
 
         {/* Notes Tab Content */}
         {activeTab === 'notes' && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Left Sidebar - Class Info */}
-            <div className="space-y-6">
+            <div className="lg:order-first space-y-4 sm:space-y-6">
               {/* Mes Classes Card */}
               <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
                 <CardContent className="p-6">
