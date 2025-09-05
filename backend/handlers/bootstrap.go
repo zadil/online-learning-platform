@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"online-learning-platform-backend/internal/db"
 	"time"
@@ -127,6 +128,7 @@ func CreateFirstAdmin(queries *db.Queries, dbConn *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Erreur lors de la vérification des administrateurs existants",
+				"debug": err.Error(),
 			})
 			return
 		}
@@ -134,6 +136,7 @@ func CreateFirstAdmin(queries *db.Queries, dbConn *sql.DB) gin.HandlerFunc {
 		if adminCount > 0 {
 			c.JSON(http.StatusConflict, gin.H{
 				"error": "Un administrateur existe déjà",
+				"debug": fmt.Sprintf("Found %d admin(s) in database", adminCount),
 			})
 			return
 		}

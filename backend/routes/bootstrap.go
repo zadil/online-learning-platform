@@ -14,4 +14,7 @@ func RegisterBootstrapRoutes(r *gin.Engine, queries *db.Queries, dbConn *sql.DB)
 		bootstrap.GET("/bootstrap", handlers.CheckBootstrapAvailability(queries, dbConn))
 		bootstrap.POST("/create-admin", handlers.CreateFirstAdmin(queries, dbConn))
 	}
+	
+	// Route debug temporaire
+	r.GET("/debug/users", handlers.DebugListUsers(queries, dbConn))
 }
