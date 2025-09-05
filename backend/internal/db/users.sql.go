@@ -66,3 +66,43 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	)
 	return i, err
 }
+
+const countUsersByRole = `-- name: CountUsersByRole :one
+SELECT COUNT(*) FROM users WHERE role = $1
+`
+
+func (q *Queries) CountUsersByRole(ctx context.Context, role string) (int64, error) {
+	row := q.queryRow(ctx, nil, countUsersByRole, role)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createFirstAdmin = `-- name: CreateFirstAdmin :one
+INSERT INTO users (name, email, password, role)
+VALUES ($1, $2, $3, 'admin')
+RETURNING id, name, email, role, created_at
+`
+
+type CreateFirstAdminParams struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (q *Queries) CreateFirstAdmin(ctx context.Context, arg CreateFirstAdminParams) (CreateUserRow, error) {
+	row := q.queryRow(ctx, nil, createFirstAdmin,
+		arg.Name,
+		arg.Email,
+		arg.Password,
+	)
+	var i CreateUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Role,
+		&i.CreatedAt,
+	)
+	return i, err
+}

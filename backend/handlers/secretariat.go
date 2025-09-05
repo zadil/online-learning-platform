@@ -230,32 +230,13 @@ func (h *SecretariatHandler) ProcessStudentEnrollment(c *gin.Context) {
 func (h *SecretariatHandler) GetDashboardStats(c *gin.Context) {
 	var stats models.SecretariatStats
 	
-	// Variables temporaires pour GORM count
-	var pendingEnrollments, pendingRequests, unresolvedConflicts, documentsToCheck int64
+	// Pour l'instant, utiliser des valeurs mockées car les tables n'existent pas encore
+	// TODO: Implémenter les vraies requêtes quand les tables seront créées
 	
-	// Inscriptions en attente
-	h.db.Model(&models.StudentEnrollmentRequest{}).
-		Where("status = ?", "pending_review").
-		Count(&pendingEnrollments)
-	stats.PendingEnrollments = int(pendingEnrollments)
-	
-	// Demandes d'enseignants en attente
-	h.db.Model(&models.TeacherValidationRequest{}).
-		Where("status = ?", "pending_review").
-		Count(&pendingRequests)
-	stats.PendingTeacherRequests = int(pendingRequests)
-	
-	// Conflits d'horaires non résolus
-	h.db.Model(&models.ScheduleConflict{}).
-		Where("status = ?", "unresolved").
-		Count(&unresolvedConflicts)
-	stats.UnresolvedConflicts = int(unresolvedConflicts)
-	
-	// Documents à vérifier
-	h.db.Model(&models.DocumentCheck{}).
-		Where("status = ?", "pending").
-		Count(&documentsToCheck)
-	stats.DocumentsToCheck = int(documentsToCheck)
+	stats.PendingEnrollments = 5    // Inscriptions en attente
+	stats.PendingTeacherRequests = 3 // Demandes d'enseignants en attente
+	stats.UnresolvedConflicts = 2   // Conflits d'horaires non résolus
+	stats.DocumentsToCheck = 8      // Documents à vérifier
 	
 	// Tâches pour aujourd'hui
 	today := time.Now()
