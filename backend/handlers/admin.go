@@ -122,23 +122,32 @@ func (h *AdminHandler) GetDashboardStats(c *gin.Context) {
 		CoursesNeedingTeacher  int `json:"courses_needing_teacher"`
 	}
 	
+	// Variables temporaires pour GORM count
+	var totalStudents, totalTeachers, validatedTeachers, pendingRequests, totalCourses, coursesNeedingTeacher int64
+	
 	// Compter les étudiants
-	h.db.Model(&models.User{}).Where("role = ?", models.RoleStudent).Count(&stats.TotalStudents)
+	h.db.Model(&models.User{}).Where("role = ?", models.RoleStudent).Count(&totalStudents)
+	stats.TotalStudents = int(totalStudents)
 	
 	// Compter les enseignants
-	h.db.Model(&models.User{}).Where("role = ?", models.RoleTeacher).Count(&stats.TotalTeachers)
+	h.db.Model(&models.User{}).Where("role = ?", models.RoleTeacher).Count(&totalTeachers)
+	stats.TotalTeachers = int(totalTeachers)
 	
 	// Compter les enseignants validés
-	h.db.Model(&models.User{}).Where("role = ? AND status = ?", models.RoleTeacher, models.StatusValidated).Count(&stats.ValidatedTeachers)
+	h.db.Model(&models.User{}).Where("role = ? AND status = ?", models.RoleTeacher, models.StatusValidated).Count(&validatedTeachers)
+	stats.ValidatedTeachers = int(validatedTeachers)
 	
 	// Compter les demandes en attente
-	h.db.Model(&models.TeacherValidationRequest{}).Where("status = ?", "pending_review").Count(&stats.PendingTeacherRequests)
+	h.db.Model(&models.TeacherValidationRequest{}).Where("status = ?", "pending_review").Count(&pendingRequests)
+	stats.PendingTeacherRequests = int(pendingRequests)
 	
 	// Compter les cours
-	h.db.Model(&models.Course{}).Count(&stats.TotalCourses)
+	h.db.Model(&models.Course{}).Count(&totalCourses)
+	stats.TotalCourses = int(totalCourses)
 	
 	// Compter les cours sans enseignant
-	h.db.Model(&models.Course{}).Where("status = ?", models.CourseStatusNeedTeacher).Count(&stats.CoursesNeedingTeacher)
+	h.db.Model(&models.Course{}).Where("status = ?", models.CourseStatusNeedTeacher).Count(&coursesNeedingTeacher)
+	stats.CoursesNeedingTeacher = int(coursesNeedingTeacher)
 	
 	c.JSON(http.StatusOK, stats)
 }

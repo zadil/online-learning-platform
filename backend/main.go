@@ -28,9 +28,9 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:58908", "http://localhost:58908"},
 		AllowOriginFunc: func(origin string) bool {
-			// Autorise tout localhost ou 127.0.0.1 sur n'importe quel port
+			// Autorise tout localhost, 127.0.0.1 et les domaines sandbox e2b.dev
 			return origin == "http://localhost:5173" || origin == "http://127.0.0.1:5173" || origin == "http://localhost:3000" || origin == "http://127.0.0.1:3000" || origin == "http://127.0.0.1:58908" || origin == "http://localhost:58908" ||
-				strings.HasPrefix(origin, "http://localhost:") || strings.HasPrefix(origin, "http://127.0.0.1:")
+				strings.HasPrefix(origin, "http://localhost:") || strings.HasPrefix(origin, "http://127.0.0.1:") || strings.HasSuffix(origin, ".e2b.dev")
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
@@ -45,6 +45,7 @@ func main() {
 	routes.RegisterUserRoutes(r, queries, dbConn)
 	routes.RegisterAuthRoutes(r, queries, dbConn)
 	routes.RegisterCoursesRoutes(r, queries, dbConn)
+	routes.RegisterBootstrapRoutes(r, queries, dbConn)
 
 	routes.RegisterProtectedRoutes(r, dbConn)
 
