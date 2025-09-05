@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchApi } from '../utils/api';
 
 const AdminBootstrap = () => {
   const navigate = useNavigate();
@@ -23,7 +22,7 @@ const AdminBootstrap = () => {
 
   const checkBootstrapAvailability = async () => {
     try {
-      const response = await fetchApi('/bo/setup/bootstrap');
+      const response = await fetch('http://localhost:8080/bo/setup/bootstrap');
       const data = await response.json();
       
       if (response.ok) {
@@ -31,12 +30,17 @@ const AdminBootstrap = () => {
         setAttemptsRemaining(data.attempts_remaining);
       } else {
         setError(data.error);
+        // Mettre bootstrapStatus à false pour déclencher l'affichage  
+        setBootstrapStatus(false);
         if (data.reason === 'déjà utilisé') {
           setTimeout(() => navigate('/bo/admin'), 3000);
         }
       }
     } catch (err) {
-      setError('Erreur de connexion au serveur');
+      console.error('Bootstrap API Error:', err);
+      setError('Erreur de connexion au serveur: ' + err.message);
+      // Mettre bootstrapStatus à false pour déclencher l'affichage
+      setBootstrapStatus(false);
     }
   };
 
@@ -89,8 +93,11 @@ const AdminBootstrap = () => {
     setError('');
     
     try {
-      const response = await fetchApi('/bo/setup/create-admin', {
+      const response = await fetch('http://localhost:8080/bo/setup/create-admin', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
@@ -170,7 +177,7 @@ const AdminBootstrap = () => {
           )}
         </div>
 
-        {bootstrapStatus && (
+        {bootstrapStatus !== null && (
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
@@ -272,7 +279,7 @@ const AdminBootstrap = () => {
 
             <button
               type="submit"
-              disabled={loading || !bootstrapStatus}
+              disabled={loading || (bootstrapStatus && !bootstrapStatus.available)}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               {loading ? (
