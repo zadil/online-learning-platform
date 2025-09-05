@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchApi } from '../utils/api';
 
 const AdminBootstrap = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const AdminBootstrap = () => {
 
   const checkBootstrapAvailability = async () => {
     try {
-      const response = await fetch('http://localhost:8080/bo/setup/bootstrap');
+      const response = await fetchApi('/bo/setup/bootstrap');
       const data = await response.json();
       
       if (response.ok) {
@@ -88,11 +89,8 @@ const AdminBootstrap = () => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:8080/bo/setup/create-admin', {
+      const response = await fetchApi('/bo/setup/create-admin', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
