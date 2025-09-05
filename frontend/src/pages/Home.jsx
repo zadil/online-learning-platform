@@ -89,11 +89,45 @@ export default function Home({ user }) {
               <Button 
                 size="lg" 
                 className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl"
-                onClick={() => token ? navigate('/catalog') : navigate('/register')}
+                onClick={() => {
+                  if (!token) {
+                    navigate('/register');
+                  } else if (user) {
+                    // Redirection intelligente selon le rôle
+                    switch (user.role) {
+                      case 'admin':
+                        navigate('/admin-dashboard');
+                        break;
+                      case 'secretariat':
+                        navigate('/secretariat-dashboard');
+                        break;
+                      case 'teacher':
+                        if (user.status === 'validated') {
+                          navigate('/teacher-portal');
+                        } else {
+                          navigate('/catalog'); // Enseignant non validé peut voir les cours
+                        }
+                        break;
+                      default:
+                        navigate('/catalog');
+                    }
+                  } else {
+                    navigate('/catalog');
+                  }
+                }}
               >
-                {token ? 'Voir les cours' : 'Commencer gratuitement'}
+                {!token ? 'Commencer gratuitement' :
+                 user?.role === 'admin' ? 'Administration' :
+                 user?.role === 'secretariat' ? 'Secrétariat' :
+                 user?.role === 'teacher' && user?.status === 'validated' ? 'Portail Enseignant' :
+                 'Voir les cours'}
               </Button>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-white text-white hover:bg-white/10"
+                onClick={() => navigate('/catalog')}
+              >
                 Découvrir
               </Button>
             </div>
@@ -102,12 +136,34 @@ export default function Home({ user }) {
             </p>
           </div>
 
+          {/* Message spécial pour enseignants non validés */}
+          {user && user.role === 'teacher' && user.status === 'pending_validation' && (
+            <div className="mt-16 max-w-3xl mx-auto">
+              <Card className="bg-yellow-50 border-yellow-200">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-yellow-600 text-2xl">⏳</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-yellow-800 mb-2">Compte en attente de validation</h3>
+                  <p className="text-yellow-700 mb-4">
+                    Bonjour {user.name}, votre demande d'enseignant est en cours de traitement par l'administration. 
+                    Vous recevrez un email dès que votre compte sera validé.
+                  </p>
+                  <div className="text-sm text-yellow-600">
+                    <p><strong>Statut :</strong> En attente de validation</p>
+                    <p><strong>Département :</strong> {user.department || 'Non spécifié'}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Glass Cards Section */}
-          <div className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className={`${user && user.role === 'teacher' && user.status === 'pending_validation' ? 'mt-8' : 'mt-24'} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto`}>
             {/* Tableau de bord Card */}
             <Card variant="glass" className="p-6 transform hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-between mb-4">
-                <div className="text-sm text-gray-600">Tableau de bord</div>
+                <div className="text-sm text-gray-600">Profil Utilisateur</div>
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg flex items-center justify-center">
                   <TrendingUpIcon className="w-4 h-4 text-white" />
                 </div>
@@ -124,16 +180,35 @@ export default function Home({ user }) {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500 truncate max-w-[120px]">{user.email}</span>
-                      <span className="text-sm font-medium text-blue-600 capitalize">
-                        {user.role === 'student' ? 'Apprenant' : user.role === 'teacher' ? 'Formateur' : user.role}
+                      <span className={`text-sm font-medium capitalize ${
+                        user.role === 'admin' ? 'text-red-600' :
+                        user.role === 'secretariat' ? 'text-green-600' :
+                        user.role === 'teacher' ? 'text-purple-600' :
+                        'text-blue-600'
+                      }`}>
+                        {user.role === 'student' ? 'Apprenant' : 
+                         user.role === 'teacher' ? 'Enseignant' :
+                         user.role === 'secretariat' ? 'Secrétariat' :
+                         user.role === 'admin' ? 'Administrateur' : user.role}
                       </span>
                     </div>
+                    {user.role === 'teacher' && (
+                      <div className="mt-2">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          user.status === 'validated' ? 'bg-green-100 text-green-800' :
+                          user.status === 'pending_validation' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {user.status === 'validated' ? 'Validé' :
+                           user.status === 'pending_validation' ? 'En attente' : user.status}
+                        </span>
+                      </div>
+                    )}
                     <div className="mt-3 flex justify-between">
                       <span className="text-sm text-gray-600">Membre depuis</span>
-                      <div className="w-16 h-8 bg-blue-100 rounded"></div>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {user.CreatedAt ? new Date(user.CreatedAt).toLocaleDateString('fr-FR') : 'Récemment'}
+                      <div className="text-sm text-gray-500">
+                        {user.CreatedAt ? new Date(user.CreatedAt).toLocaleDateString('fr-FR') : 'Récemment'}
+                      </div>
                     </div>
                   </>
                 )}

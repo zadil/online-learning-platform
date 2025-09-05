@@ -7,6 +7,8 @@ import Profile from './pages/Profile';
 import Catalog from './pages/Catalog';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import SecretariatDashboard from './pages/SecretariatDashboard';
 import TeacherPortal from './pages/TeacherPortal';
 import "./App.css";
 
@@ -32,8 +34,9 @@ function App() {
 
   const handleLogin = (tok) => {
     login(tok);
-    // Redirect to dashboard if user is a teacher/admin, otherwise to home
-    navigate("/dashboard", { replace: true });
+    // Redirection conditionnelle selon le rôle utilisateur
+    // On va déterminer la redirection après avoir récupéré les infos utilisateur
+    navigate("/", { replace: true });
   };
 
   const handleLogout = () => {
@@ -42,18 +45,77 @@ function App() {
   };
 
   // Pages that should not show the navigation
-  const noNavPages = ['/login', '/register', '/dashboard', '/teacher-portal'];
+  const noNavPages = ['/login', '/register', '/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal'];
   const showNav = !noNavPages.includes(location.pathname);
 
   // Pages that have their own full layout
-  const fullLayoutPages = ['/dashboard', '/teacher-portal'];
+  const fullLayoutPages = ['/dashboard', '/admin-dashboard', '/secretariat-dashboard', '/teacher-portal'];
   const isFullLayout = fullLayoutPages.includes(location.pathname);
+
+  // Redirection automatique selon le rôle utilisateur
+  useEffect(() => {
+    if (user && location.pathname === '/') {
+      // Rediriger vers le tableau de bord approprié selon le rôle
+      switch (user.role) {
+        case 'admin':
+          navigate('/admin-dashboard', { replace: true });
+          break;
+        case 'secretariat':
+          navigate('/secretariat-dashboard', { replace: true });
+          break;
+        case 'teacher':
+          if (user.status === 'validated') {
+            navigate('/teacher-portal', { replace: true });
+          }
+          // Si l'enseignant n'est pas validé, il reste sur la page d'accueil avec un message
+          break;
+        case 'student':
+          // Les étudiants restent sur la page d'accueil
+          break;
+        default:
+          break;
+      }
+    }
+  }, [user, location.pathname, navigate]);
 
   if (isFullLayout) {
     return (
       <Routes>
         <Route path="/dashboard" element={<Dashboard user={user} token={token} />} />
-        <Route path="/teacher-portal" element={<TeacherPortal user={user} token={token} />} />
+        <Route path="/admin-dashboard" element={
+          user && user.role === 'admin' ? 
+            <AdminDashboard user={user} token={token} /> : 
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Accès non autorisé</h2>
+                <p className="text-gray-600">Seuls les administrateurs peuvent accéder à cette page.</p>
+              </div>
+            </div>
+        } />
+        <Route path="/secretariat-dashboard" element={
+          user && (user.role === 'secretariat' || user.role === 'admin') ? 
+            <SecretariatDashboard user={user} token={token} /> : 
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Accès non autorisé</h2>
+                <p className="text-gray-600">Seul le secrétariat peut accéder à cette page.</p>
+              </div>
+            </div>
+        } />
+        <Route path="/teacher-portal" element={
+          user && user.role === 'teacher' && user.status === 'validated' ? 
+            <TeacherPortal user={user} token={token} /> : 
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Accès non autorisé</h2>
+                <p className="text-gray-600">
+                  {user && user.role === 'teacher' && user.status !== 'validated' 
+                    ? 'Votre compte enseignant est en attente de validation par l\'administration.'
+                    : 'Seuls les enseignants validés peuvent accéder à cette page.'}
+                </p>
+              </div>
+            </div>
+        } />
       </Routes>
     );
   }
@@ -95,19 +157,35 @@ function App() {
                 >
                   Catalogue
                 </button>
-                {token && (
-                  <button
-                    onClick={() => navigate("/dashboard", { replace: true })}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                      location.pathname === "/dashboard" 
-                        ? "bg-primary-50 text-primary-600" 
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                    }`}
-                  >
-                    Tableau de bord
-                  </button>
+                {token && user && (
+                  <>
+                    {user.role === 'admin' && (
+                      <button
+                        onClick={() => navigate("/admin-dashboard", { replace: true })}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                          location.pathname === "/admin-dashboard" 
+                            ? "bg-primary-50 text-primary-600" 
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
+                      >
+                        Administration
+                      </button>
+                    )}
+                    {user.role === 'secretariat' && (
+                      <button
+                        onClick={() => navigate("/secretariat-dashboard", { replace: true })}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                          location.pathname === "/secretariat-dashboard" 
+                            ? "bg-primary-50 text-primary-600" 
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
+                      >
+                        Secrétariat
+                      </button>
+                    )}
+                  </>
                 )}
-                {token && (
+                {token && user && user.role === 'teacher' && user.status === 'validated' && (
                   <button
                     onClick={() => navigate("/teacher-portal", { replace: true })}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
@@ -179,8 +257,6 @@ function App() {
           <Route path="/register" element={<Register onRegister={() => navigate("/login", { replace: true })} />} />
           <Route path="/profile" element={<Profile token={token} />} />
           <Route path="/catalog" element={<Catalog user={user} token={token} />} />
-          <Route path="/dashboard" element={<Dashboard user={user} token={token} />} />
-          <Route path="/teacher-portal" element={<TeacherPortal user={user} token={token} />} />
         </Routes>
       </main>
     </div>
