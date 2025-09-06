@@ -12,6 +12,44 @@ import (
 	"online-learning-platform-backend/routes"
 )
 
+// Initialise la base de données avec les tables nécessaires
+func initializeDatabase(dbConn *sql.DB) error {
+	// Créer la table users si elle n'existe pas
+	usersTable := `
+		CREATE TABLE IF NOT EXISTS users (
+			id SERIAL PRIMARY KEY,
+			name TEXT NOT NULL,
+			email TEXT UNIQUE NOT NULL,
+			password TEXT NOT NULL,
+			role TEXT NOT NULL,
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+		);
+	`
+	
+	if _, err := dbConn.Exec(usersTable); err != nil {
+		return err
+	}
+	
+	// Créer la table courses si elle n'existe pas
+	coursesTable := `
+		CREATE TABLE IF NOT EXISTS courses (
+			id SERIAL PRIMARY KEY,
+			title TEXT NOT NULL,
+			description TEXT,
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+			author_id INTEGER REFERENCES users(id)
+		);
+	`
+	
+	if _, err := dbConn.Exec(coursesTable); err != nil {
+		return err
+	}
+	
+	log.Println("✅ Tables de base de données initialisées avec succès")
+	return nil
+}
+
 
 
 
@@ -21,6 +59,11 @@ func main() {
 		log.Fatalf("Erreur de connexion à la base de données : %v", err)
 	}
 	defer dbConn.Close()
+
+	// Créer les tables si elles n'existent pas
+	if err := initializeDatabase(dbConn); err != nil {
+		log.Fatalf("Erreur lors de l'initialisation de la base de données : %v", err)
+	}
 
 	queries := db.New(dbConn)
 

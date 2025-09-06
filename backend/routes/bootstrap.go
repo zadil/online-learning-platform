@@ -16,6 +16,7 @@ func RegisterBootstrapRoutes(r *gin.Engine, queries *db.Queries, dbConn *sql.DB)
 	}
 	
 	// Routes debug temporaires (DÉVELOPPEMENT SEULEMENT)
+	r.GET("/health", handlers.HealthCheck(queries, dbConn))
 	r.GET("/debug/users", handlers.DebugListUsers(queries, dbConn))
 	r.DELETE("/debug/reset-users", handlers.ResetUsers(queries, dbConn))
 }
