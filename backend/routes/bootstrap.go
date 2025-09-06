@@ -15,6 +15,7 @@ func RegisterBootstrapRoutes(r *gin.Engine, queries *db.Queries, dbConn *sql.DB)
 		bootstrap.POST("/create-admin", handlers.CreateFirstAdmin(queries, dbConn))
 	}
 	
-	// Route debug temporaire
+	// Routes debug temporaires (DÉVELOPPEMENT SEULEMENT)
 	r.GET("/debug/users", handlers.DebugListUsers(queries, dbConn))
+	r.DELETE("/debug/reset-users", handlers.ResetUsers(queries, dbConn))
 }
